@@ -13,8 +13,7 @@ CREATE TABLE account (
     rent_epoch BIGINT NOT NULL,
     data BYTEA,
     write_version BIGINT NOT NULL,
-    updated_on TIMESTAMP NOT NULL,
-    txn_signature BYTEA
+    updated_on TIMESTAMP NOT NULL
 );
 
 CREATE INDEX account_owner ON account (owner);
@@ -213,8 +212,7 @@ CREATE TABLE account_audit (
     rent_epoch BIGINT NOT NULL,
     data BYTEA,
     write_version BIGINT NOT NULL,
-    updated_on TIMESTAMP NOT NULL,
-    txn_signature BYTEA
+    updated_on TIMESTAMP NOT NULL
 );
 
 CREATE INDEX account_audit_account_key ON  account_audit (pubkey, write_version);
@@ -223,11 +221,9 @@ CREATE INDEX account_audit_pubkey_slot ON account_audit (pubkey, slot);
 
 CREATE FUNCTION audit_account_update() RETURNS trigger AS $audit_account_update$
     BEGIN
-		INSERT INTO account_audit (pubkey, owner, lamports, slot, executable,
-		                           rent_epoch, data, write_version, updated_on, txn_signature)
+		INSERT INTO account_audit (pubkey, owner, lamports, slot, executable, rent_epoch, data, write_version, updated_on)
             VALUES (OLD.pubkey, OLD.owner, OLD.lamports, OLD.slot,
-                    OLD.executable, OLD.rent_epoch, OLD.data,
-                    OLD.write_version, OLD.updated_on, OLD.txn_signature);
+                    OLD.executable, OLD.rent_epoch, OLD.data, OLD.write_version, OLD.updated_on);
         RETURN NEW;
     END;
 

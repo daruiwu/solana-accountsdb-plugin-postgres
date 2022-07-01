@@ -93,9 +93,6 @@ pub enum GeyserPluginPostgresError {
 
     #[error("Error preparing data store schema. Error message: ({msg})")]
     ConfigurationError { msg: String },
-
-    #[error("Replica account V0.0.1 not supported anymore")]
-    ReplicaAccountV001NotSupported,
 }
 
 impl GeyserPlugin for GeyserPluginPostgres {
@@ -216,12 +213,7 @@ impl GeyserPlugin for GeyserPluginPostgres {
     ) -> Result<()> {
         let mut measure_all = Measure::start("geyser-plugin-postgres-update-account-main");
         match account {
-            ReplicaAccountInfoVersions::V0_0_1(_) => {
-                return Err(GeyserPluginError::Custom(Box::new(
-                    GeyserPluginPostgresError::ReplicaAccountV001NotSupported,
-                )));
-            }
-            ReplicaAccountInfoVersions::V0_0_2(account) => {
+            ReplicaAccountInfoVersions::V0_0_1(account) => {
                 let mut measure_select =
                     Measure::start("geyser-plugin-postgres-update-account-select");
                 if let Some(accounts_selector) = &self.accounts_selector {
