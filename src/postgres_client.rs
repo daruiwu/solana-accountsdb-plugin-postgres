@@ -926,7 +926,7 @@ impl PostgresClientWorker {
                 is_startup_done: false,
             }),
             Err(err) => {
-                error!("Error in creating SimplePostgresClient: {}", err);
+                error!("Error in creating SimplePostgresClient: {:?}", err);
                 Err(err)
             }
         }
@@ -957,7 +957,7 @@ impl PostgresClientWorker {
                             .client
                             .update_account(request.account, request.is_startup)
                         {
-                            error!("Failed to update account: ({})", err);
+                            error!("Failed to update account: ({:?})", err);
                             if panic_on_db_errors {
                                 abort();
                             }
@@ -969,7 +969,7 @@ impl PostgresClientWorker {
                             request.parent,
                             request.slot_status,
                         ) {
-                            error!("Failed to update slot: ({})", err);
+                            error!("Failed to update slot: ({:?})", err);
                             if panic_on_db_errors {
                                 abort();
                             }
@@ -977,7 +977,7 @@ impl PostgresClientWorker {
                     }
                     DbWorkItem::LogTransaction(transaction_log_info) => {
                         if let Err(err) = self.client.log_transaction(*transaction_log_info) {
-                            error!("Failed to update transaction: ({})", err);
+                            error!("Failed to update transaction: ({:?})", err);
                             if panic_on_db_errors {
                                 abort();
                             }
@@ -985,7 +985,7 @@ impl PostgresClientWorker {
                     }
                     DbWorkItem::UpdateBlockMetadata(block_info) => {
                         if let Err(err) = self.client.update_block_metadata(*block_info) {
-                            error!("Failed to update block metadata: ({})", err);
+                            error!("Failed to update block metadata: ({:?})", err);
                             if panic_on_db_errors {
                                 abort();
                             }
@@ -996,7 +996,7 @@ impl PostgresClientWorker {
                     RecvTimeoutError::Timeout => {
                         if !self.is_startup_done && is_startup_done.load(Ordering::Relaxed) {
                             if let Err(err) = self.client.notify_end_of_startup() {
-                                error!("Error in notifying end of startup: ({})", err);
+                                error!("Error in notifying end of startup: ({:?})", err);
                                 if panic_on_db_errors {
                                     abort();
                                 }
@@ -1070,7 +1070,7 @@ impl ParallelPostgresClient {
                             Ok(())
                         }
                         Err(err) => {
-                            error!("Error when making connection to database: ({})", err);
+                            error!("Error when making connection to database: ({:?})", err);
                             if panic_on_db_errors {
                                 abort();
                             }
