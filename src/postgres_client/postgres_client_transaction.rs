@@ -25,10 +25,7 @@ use {
         InnerInstructions, Reward, TransactionStatusMeta, TransactionTokenBalance,
     },
     std::sync::atomic::Ordering,
-    bs58,
-    hex,
 };
-use std::str;
 
 const MAX_TRANSACTION_STATUS_LEN: usize = 256;
 
