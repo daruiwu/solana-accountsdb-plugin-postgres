@@ -1,11 +1,11 @@
 /// Main entry for the PostgreSQL plugin
 use {
+    bs58,
     crate::{
         accounts_selector::AccountsSelector,
         postgres_client::{ParallelPostgresClient, PostgresClientBuilder},
         transaction_selector::TransactionSelector,
     },
-    bs58,
     log::*,
     serde_derive::{Deserialize, Serialize},
     serde_json,
@@ -18,6 +18,8 @@ use {
     std::{fs::File, io::Read},
     thiserror::Error,
 };
+
+use crate::stepn_selector;
 
 #[derive(Default)]
 pub struct GeyserPluginPostgres {
@@ -183,7 +185,7 @@ impl GeyserPlugin for GeyserPluginPostgres {
                         "The config file is not in the JSON format expected: {:?}",
                         err
                     ),
-                })
+                });
             }
             Ok(config) => {
                 let client = PostgresClientBuilder::build_pararallel_postgres_client(&config)?;
@@ -303,7 +305,7 @@ impl GeyserPlugin for GeyserPluginPostgres {
                 let result = client.update_slot_status(slot, parent, status);
 
                 if let Err(err) = result {
-                    return Err(GeyserPluginError::SlotStatusUpdateError{
+                    return Err(GeyserPluginError::SlotStatusUpdateError {
                         msg: format!("Failed to persist the update of slot to the PostgreSQL database. Error: {:?}", err)
                     });
                 }
@@ -327,7 +329,7 @@ impl GeyserPlugin for GeyserPluginPostgres {
                 let result = client.notify_end_of_startup();
 
                 if let Err(err) = result {
-                    return Err(GeyserPluginError::SlotStatusUpdateError{
+                    return Err(GeyserPluginError::SlotStatusUpdateError {
                         msg: format!("Failed to notify the end of startup for accounts notifications. Error: {:?}", err)
                     });
                 }
@@ -361,13 +363,16 @@ impl GeyserPlugin for GeyserPluginPostgres {
                     } else {
                         return Ok(());
                     }
+                    if !stepn_selector::is_stepn(transaction_info) {
+                        return Ok(());
+                    }
 
                     let result = client.log_transaction_info(transaction_info, slot);
 
                     if let Err(err) = result {
-                        return Err(GeyserPluginError::SlotStatusUpdateError{
-                                msg: format!("Failed to persist the transaction info to the PostgreSQL database. Error: {:?}", err)
-                            });
+                        return Err(GeyserPluginError::SlotStatusUpdateError {
+                            msg: format!("Failed to persist the transaction info to the PostgreSQL database. Error: {:?}", err)
+                        });
                     }
                 }
             },
@@ -390,9 +395,9 @@ impl GeyserPlugin for GeyserPluginPostgres {
                     let result = client.update_block_metadata(block_info);
 
                     if let Err(err) = result {
-                        return Err(GeyserPluginError::SlotStatusUpdateError{
-                                msg: format!("Failed to persist the update of block metadata to the PostgreSQL database. Error: {:?}", err)
-                            });
+                        return Err(GeyserPluginError::SlotStatusUpdateError {
+                            msg: format!("Failed to persist the update of block metadata to the PostgreSQL database. Error: {:?}", err)
+                        });
                     }
                 }
             },
@@ -490,7 +495,7 @@ pub unsafe extern "C" fn _create_plugin() -> *mut dyn GeyserPlugin {
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use {super::*, serde_json};
+    use {serde_json, super::*};
 
     #[test]
     fn test_accounts_selector_from_config() {

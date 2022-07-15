@@ -1,6 +1,7 @@
+use std::str;
+
 use solana_geyser_plugin_interface::geyser_plugin_interface::ReplicaTransactionInfo;
 use solana_sdk::message::SanitizedMessage;
-use std::str;
 
 const STEPN_ACCOUNT: &str = "STEPNq2UGeGSzCyGVr2nMQAzf8xuejwqebd84wcksCK";
 
@@ -28,15 +29,12 @@ pub fn is_stepn(transaction_info: &ReplicaTransactionInfo) -> bool {
         return true;
     }
 
-    return match transaction_info.transaction_status_meta.pre_token_balances.as_ref() {
-        Some(pre_token_balances) => {
-            for pre_token_balance in pre_token_balances {
-                if pre_token_balance.owner.contains(STEPN_ACCOUNT) {
-                    return true;
-                }
+    return if let Some(pre_token_balances) = transaction_info.transaction_status_meta.pre_token_balances.as_ref() {
+        for pre_token_balance in pre_token_balances {
+            if pre_token_balance.owner.contains(STEPN_ACCOUNT) {
+                return true;
             }
-            false
         }
-        _ => false
-    };
+        false
+    } else { false };
 }
