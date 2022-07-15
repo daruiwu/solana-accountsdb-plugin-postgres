@@ -527,7 +527,6 @@ fn build_db_transaction(
     }
 }
 
-const STEPN_ACCOUNT: &str = "STEPNq2UGeGSzCyGVr2nMQAzf8xuejwqebd84wcksCK";
 
 impl SimplePostgresClient {
     pub(crate) fn build_transaction_info_upsert_statement(
@@ -573,11 +572,6 @@ impl SimplePostgresClient {
 
         let transaction_info = transaction_log_info.transaction_info;
 
-        let related_stepn = Self::is_stepn(&transaction_info);
-        if !related_stepn {
-            return Ok(());
-        }
-
         let result = client.query(
             statement,
             &[
@@ -605,26 +599,6 @@ impl SimplePostgresClient {
         }
 
         Ok(())
-    }
-
-    fn is_stepn(transaction_info: &DbTransaction) -> bool {
-        let legacy_message = transaction_info.legacy_message.as_ref().unwrap();
-        let account_keys = legacy_message.account_keys.clone();
-        for account_key in account_keys {
-            let account_str: &str = str::from_utf8(&account_key).unwrap();
-            let decoded = hex::decode(account_str).expect("Decoding failed");
-            let account = bs58::encode(decoded).into_string();
-            if account == STEPN_ACCOUNT {
-                return true;
-            }
-        }
-        let pre_token_balances = transaction_info.meta.pre_token_balances.as_ref().unwrap();
-        for pre_token_balance in pre_token_balances {
-            if pre_token_balance.owner.contains(STEPN_ACCOUNT) {
-                return true;
-            }
-        }
-        false
     }
 }
 
