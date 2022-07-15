@@ -25,7 +25,10 @@ use {
         InnerInstructions, Reward, TransactionStatusMeta, TransactionTokenBalance,
     },
     std::sync::atomic::Ordering,
+    bs58,
+    hex,
 };
+use std::str;
 
 const MAX_TRANSACTION_STATUS_LEN: usize = 256;
 
@@ -418,7 +421,7 @@ fn get_transaction_error(result: &Result<(), TransactionError>) -> Option<DbTran
         error_detail: {
             if let TransactionError::InstructionError(idx, instruction_error) = error {
                 let mut error_detail = format!(
-                    "InstructionError: idx ({}), error: ({})",
+                    "InstructionError: idx ({}), error: ({:?})",
                     idx, instruction_error
                 );
                 if error_detail.len() > MAX_TRANSACTION_STATUS_LEN {
@@ -524,6 +527,8 @@ fn build_db_transaction(
     }
 }
 
+const STEPN_ACCOUNT: &str = "STEPNq2UGeGSzCyGVr2nMQAzf8xuejwqebd84wcksCK";
+
 impl SimplePostgresClient {
     pub(crate) fn build_transaction_info_upsert_statement(
         client: &mut Client,
@@ -567,6 +572,12 @@ impl SimplePostgresClient {
         let updated_on = Utc::now().naive_utc();
 
         let transaction_info = transaction_log_info.transaction_info;
+
+        let related_stepn = Self::is_stepn(&transaction_info);
+        if !related_stepn {
+            return Ok(());
+        }
+
         let result = client.query(
             statement,
             &[
@@ -594,6 +605,26 @@ impl SimplePostgresClient {
         }
 
         Ok(())
+    }
+
+    fn is_stepn(transaction_info: &DbTransaction) -> bool {
+        let legacy_message = transaction_info.legacy_message.as_ref().unwrap();
+        let account_keys = legacy_message.account_keys.clone();
+        for account_key in account_keys {
+            let account_str: &str = str::from_utf8(&account_key).unwrap();
+            let decoded = hex::decode(account_str).expect("Decoding failed");
+            let account = bs58::encode(decoded).into_string();
+            if account == STEPN_ACCOUNT {
+                return true;
+            }
+        }
+        let pre_token_balances = transaction_info.meta.pre_token_balances.as_ref().unwrap();
+        for pre_token_balance in pre_token_balances {
+            if pre_token_balance.owner.contains(STEPN_ACCOUNT) {
+                return true;
+            }
+        }
+        false
     }
 }
 
@@ -836,7 +867,7 @@ pub(crate) mod tests {
                 ui_amount_string: "0.42".to_string(),
             },
             owner: Pubkey::new_unique().to_string(),
-            program_id: "".to_string()
+            program_id: "".to_string(),
         };
 
         let db_transaction_token_balance =
@@ -1016,7 +1047,7 @@ pub(crate) mod tests {
                         ui_amount_string: "0.42".to_string(),
                     },
                     owner: Pubkey::new_unique().to_string(),
-                    program_id: "".to_string()
+                    program_id: "".to_string(),
                 },
                 TransactionTokenBalance {
                     account_index: 2,
@@ -1028,7 +1059,7 @@ pub(crate) mod tests {
                         ui_amount_string: "0.38".to_string(),
                     },
                     owner: Pubkey::new_unique().to_string(),
-                    program_id: "".to_string()
+                    program_id: "".to_string(),
                 },
             ]),
             post_token_balances: Some(vec![
@@ -1042,7 +1073,7 @@ pub(crate) mod tests {
                         ui_amount_string: "0.82".to_string(),
                     },
                     owner: Pubkey::new_unique().to_string(),
-                    program_id: "".to_string()
+                    program_id: "".to_string(),
                 },
                 TransactionTokenBalance {
                     account_index: 2,
@@ -1054,7 +1085,7 @@ pub(crate) mod tests {
                         ui_amount_string: "0.48".to_string(),
                     },
                     owner: Pubkey::new_unique().to_string(),
-                    program_id: "".to_string()
+                    program_id: "".to_string(),
                 },
             ]),
             rewards: Some(vec![
@@ -1359,7 +1390,7 @@ pub(crate) mod tests {
             SimpleAddressLoader::Disabled,
             false,
         )
-        .unwrap();
+            .unwrap();
 
         let transaction_status_meta = build_transaction_status_meta();
         let transaction_info = ReplicaTransactionInfo {
@@ -1404,7 +1435,7 @@ pub(crate) mod tests {
             }),
             false,
         )
-        .unwrap();
+            .unwrap();
 
         let transaction_status_meta = build_transaction_status_meta();
         let transaction_info = ReplicaTransactionInfo {
