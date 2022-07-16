@@ -3,7 +3,7 @@ use std::str;
 use log::info;
 use solana_geyser_plugin_interface::geyser_plugin_interface::ReplicaTransactionInfo;
 use solana_sdk::message::{Message, SanitizedMessage};
-use solana_transaction_status::{TransactionStatusMeta, TransactionTokenBalance};
+use solana_transaction_status::TransactionTokenBalance;
 
 const STEPN_ACCOUNT: &str = "STEPNq2UGeGSzCyGVr2nMQAzf8xuejwqebd84wcksCK";
 
