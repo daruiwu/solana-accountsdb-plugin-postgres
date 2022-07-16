@@ -343,6 +343,7 @@ impl GeyserPlugin for GeyserPluginPostgres {
         transaction_info: ReplicaTransactionInfoVersions,
         slot: u64,
     ) -> Result<()> {
+        info!("notify_transaction check");
         match &mut self.client {
             None => {
                 return Err(GeyserPluginError::Custom(Box::new(
