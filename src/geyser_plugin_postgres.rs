@@ -419,15 +419,9 @@ impl GeyserPlugin for GeyserPluginPostgres {
 
     /// Check if the plugin is interested in transaction data
     fn transaction_notifications_enabled(&self) -> bool {
-        let enabled = self.transaction_selector
+        self.transaction_selector
             .as_ref()
             .map_or_else(|| false, |selector| selector.is_enabled());
-        if enabled {
-            info!("accountsdb plugin transaction_notifications_enabled: true");
-        } else {
-            warn!("accountsdb plugin transaction_notifications_enabled: false");
-        }
-        enabled
     }
 }
 
