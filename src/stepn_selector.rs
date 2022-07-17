@@ -30,10 +30,10 @@ fn legacy_account_has_stepn(legacy_message: &Message) -> bool {
 
     account_keys.iter().any(|account_key| {
         if let Some(account_str) = str::from_utf8(&account_key).ok() {
-            info!("is_stepn_transaction check, account_key [{}], length={}", account_str, account_str.len());
             if account_str.len() <= 2 {
                 return false;
             }
+            info!("is_stepn_transaction check, account_key [{}], length={}", &account_str[2..], account_str.len());
             let decoded = hex::decode(&account_str[2..]).expect(&format!("Decoding failed: {}", account_str));
             let account = bs58::encode(decoded).into_string();
             info!("Legacy Account: {}", account);
