@@ -424,7 +424,9 @@ impl GeyserPlugin for GeyserPluginPostgres {
         let enabled = self.transaction_selector
             .as_ref()
             .map_or_else(|| false, |selector| selector.is_enabled());
-        if !enabled {
+        if enabled {
+            info!("accountsdb plugin transaction_notifications_enabled: true");
+        } else {
             warn!("accountsdb plugin transaction_notifications_enabled: false");
         }
         enabled
