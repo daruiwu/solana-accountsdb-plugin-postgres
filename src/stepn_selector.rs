@@ -34,7 +34,7 @@ fn legacy_account_has_stepn(legacy_message: &Message) -> bool {
                 return false;
             }
             info!("is_stepn_transaction check, length={}", account_str.len());
-            for c in account_str {
+            for c in account_str.chars() {
                 info!("account_key [{}]",c);
             }
             let decoded = hex::decode(&account_str).expect(&format!("Decoding failed: {}", account_str));
