@@ -343,7 +343,6 @@ impl GeyserPlugin for GeyserPluginPostgres {
         transaction_info: ReplicaTransactionInfoVersions,
         slot: u64,
     ) -> Result<()> {
-        info!("notify_transaction check");
         match &mut self.client {
             None => {
                 return Err(GeyserPluginError::Custom(Box::new(
@@ -354,7 +353,6 @@ impl GeyserPlugin for GeyserPluginPostgres {
             }
             Some(client) => match transaction_info {
                 ReplicaTransactionInfoVersions::V0_0_1(transaction_info) => {
-                    info!("is_stepn_transaction check");
                     if !stepn_selector::is_stepn_transaction(transaction_info) {
                         return Ok(());
                     }
