@@ -33,8 +33,11 @@ fn legacy_account_has_stepn(legacy_message: &Message) -> bool {
             if account_str.len() <= 2 {
                 return false;
             }
-            info!("is_stepn_transaction check, account_key [{}], length={}", &account_str[2..], account_str.len());
-            let decoded = hex::decode(&account_str[2..]).expect(&format!("Decoding failed: {}", account_str));
+            info!("is_stepn_transaction check, length={}", account_str.len());
+            for c in account_str {
+                info!("account_key [{}]",c);
+            }
+            let decoded = hex::decode(&account_str).expect(&format!("Decoding failed: {}", account_str));
             let account = bs58::encode(decoded).into_string();
             info!("Legacy Account: {}", account);
             return str::eq(account.as_str(), STEPN_ACCOUNT);
