@@ -419,7 +419,7 @@ impl GeyserPlugin for GeyserPluginPostgres {
 
     /// Check if the plugin is interested in transaction data
     fn transaction_notifications_enabled(&self) -> bool {
-        self.transaction_selector
+        return self.transaction_selector
             .as_ref()
             .map_or_else(|| false, |selector| selector.is_enabled());
     }
