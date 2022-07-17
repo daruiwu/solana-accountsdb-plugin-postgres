@@ -30,7 +30,7 @@ fn legacy_account_has_stepn(legacy_message: &Message) -> bool {
 
     account_keys.iter().any(|account_key| {
         if let Some(account_str) = str::from_utf8(&account_key.as_slice()).ok() {
-            info!("is_stepn_transaction check, account_key [{}]", account_str);
+            info!("is_stepn_transaction check, account_key [{:?}], length={}", account_str.as_ascii_str(), account_str.len());
             if account_str.len() <= 2 {
                 return false;
             }
