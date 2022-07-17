@@ -355,11 +355,11 @@ impl GeyserPlugin for GeyserPluginPostgres {
             Some(client) => match transaction_info {
                 ReplicaTransactionInfoVersions::V0_0_1(transaction_info) => {
                     info!("is_stepn_transaction check");
-                    if !stepn_selector::is_stepn_transaction(transaction_info) {
-                        info!("is_stepn_transaction false");
-                        return Ok(());
-                    }
-                    info!("is_stepn_transaction true");
+                    // if !stepn_selector::is_stepn_transaction(transaction_info) {
+                    //     info!("is_stepn_transaction false");
+                    //     return Ok(());
+                    // }
+                    // info!("is_stepn_transaction true");
                     if let Some(transaction_selector) = &self.transaction_selector {
                         if !transaction_selector.is_transaction_selected(
                             transaction_info.is_vote,
