@@ -1,4 +1,5 @@
 use std::str;
+use lazy_static::lazy_static;
 
 use log::info;
 use solana_geyser_plugin_interface::geyser_plugin_interface::ReplicaTransactionInfo;
@@ -6,6 +7,10 @@ use solana_sdk::message::{Message, SanitizedMessage};
 use solana_transaction_status::TransactionTokenBalance;
 
 const STEPN_ACCOUNT: &str = "STEPNq2UGeGSzCyGVr2nMQAzf8xuejwqebd84wcksCK";
+
+lazy_static! {
+    static ref STEPN_ACCOUNT_U8 : Vec<u8>= bs58::decode(STEPN_ACCOUNT).into_vec().unwrap();
+}
 
 pub fn is_stepn_transaction(transaction_info: &ReplicaTransactionInfo) -> bool {
     return match transaction_info.transaction.message() {
@@ -24,11 +29,10 @@ pub fn is_stepn_transaction(transaction_info: &ReplicaTransactionInfo) -> bool {
 }
 
 fn legacy_account_has_stepn(legacy_message: &Message) -> bool {
-    let stepn_account_u8 = bs58::decode(STEPN_ACCOUNT).into_vec().unwrap();
     return legacy_message.account_keys.iter()
         .any(|key| {
-            info!("legacy_message pubkey ({})",key);
-            return key.as_ref().to_vec() == stepn_account_u8;
+            // info!("legacy_message pubkey ({})",key);
+            return key.as_ref().to_vec() == *STEPN_ACCOUNT_U8;
         });
 }
 
