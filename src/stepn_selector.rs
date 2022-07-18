@@ -32,7 +32,7 @@ fn legacy_account_has_stepn(legacy_message: &Message) -> bool {
         // for c in account_key {
         //     info!("account_key [{}]",c);
         // }
-        info!("account_key ({:#?})", account_key);
+        info!("account_key (size:{})({:#?})",account_key.len(), account_key);
         if let Some(account_str) = str::from_utf8(account_key).ok() {
             info!("is_stepn_transaction check, account_str={}", account_str);
             let decoded = hex::decode(&account_str).expect(&format!("Decoding failed: {}", account_str));
