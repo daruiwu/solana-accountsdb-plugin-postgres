@@ -7,6 +7,8 @@ use solana_transaction_status::TransactionTokenBalance;
 
 const STEPN_ACCOUNT: &str = "STEPNq2UGeGSzCyGVr2nMQAzf8xuejwqebd84wcksCK";
 
+const STEPN_ACCOUNT_U8: Vec<u8> = bs58::decode("STEPNq2UGeGSzCyGVr2nMQAzf8xuejwqebd84wcksCK").into_vec().unwrap();
+
 pub fn is_stepn_transaction(transaction_info: &ReplicaTransactionInfo) -> bool {
     return match transaction_info.transaction.message() {
         SanitizedMessage::Legacy(legacy_message) => {
@@ -28,22 +30,11 @@ fn legacy_account_has_stepn(legacy_message: &Message) -> bool {
         .map(|key_bytes| key_bytes.as_ref().to_vec())
         .collect();
 
-    legacy_message.account_keys.iter()
-        .for_each(|key| {
+    return legacy_message.account_keys.iter()
+        .any(|key| {
             info!("legacy_message pubkey ({})",key);
+            return key.as_ref().to_vec() == STEPN_ACCOUNT_U8;
         });
-
-    account_keys.iter().any(|account_key| {
-        info!("account_key (size:{})({:#?})",account_key.len(), account_key);
-        if let Some(account_str) = str::from_utf8(account_key).ok() {
-            info!("is_stepn_transaction check, account_str={}", account_str);
-            let decoded = hex::decode(&account_str).expect(&format!("Decoding failed: {}", account_str));
-            let account = bs58::encode(decoded).into_string();
-            info!("Legacy Account: {}", account);
-            return str::eq(account.as_str(), STEPN_ACCOUNT);
-        }
-        return false;
-    })
 }
 
 fn pre_token_balance_owner_has_stepn(pre_token_balances: &Vec<TransactionTokenBalance>) -> bool {
