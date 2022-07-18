@@ -1,7 +1,6 @@
 use std::str;
 use lazy_static::lazy_static;
 
-use log::info;
 use solana_geyser_plugin_interface::geyser_plugin_interface::ReplicaTransactionInfo;
 use solana_sdk::message::{Message, SanitizedMessage};
 use solana_transaction_status::TransactionTokenBalance;
